@@ -1,6 +1,6 @@
 use crate::command::Command;
 use crate::OpenRGBResult as Result;
-use async_std::net::{TcpStream, ToSocketAddrs};
+use tokio::net::{TcpStream, ToSocketAddrs};
 
 pub struct OpenRGBClient {
     connection: TcpStream,
