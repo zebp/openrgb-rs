@@ -19,13 +19,4 @@ impl OpenRGBClient {
     async fn send_name(&mut self) -> Result<()> {
         todo!()
     }
-
-    async fn send_message(
-        &mut self,
-        command: Command,
-        buffer: &[u8],
-        device: Option<i32>,
-    ) -> Result<()> {
-        todo!()
-    }
 }

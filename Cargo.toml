@@ -8,7 +8,8 @@ edition = "2018"
 
 [dependencies]
 thiserror = "1.0.20"
+async-trait = "0.1.36"
 
 [dependencies.tokio]
 git = "https://github.com/tokio-rs/tokio/"
-features = ["tcp", "macros"]
+features = ["tcp", "macros", "io-util"]

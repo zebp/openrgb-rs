@@ -6,4 +6,6 @@ pub type OpenRGBResult<T> = Result<T, OpenRGBError>;
 pub enum OpenRGBError {
     #[error("io error with tcp stream {0}")]
     IO(#[from] std::io::Error),
+    #[error("invalid command id: {0}")]
+    InvalidCommand(u32),
 }
