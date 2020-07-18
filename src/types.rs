@@ -3,6 +3,7 @@ use crate::{
     OpenRGBResult,
 };
 use async_trait::async_trait;
+use tokio::io::AsyncWriteExt;
 
 pub type OpenRGBColor = u32;
 pub type OpenRGBZoneType = u32;
@@ -69,37 +70,43 @@ impl OpenRGBSendable for OpenRGBDevice {
         &self,
         writer: &mut W,
     ) -> OpenRGBResult<()> {
-        writer.write_u32_le(self.device_type).await?;
-        writer.write_string(&self.name).await?;
-        writer.write_string(&self.description).await?;
-        writer.write_string(&self.version).await?;
-        writer.write_string(&self.serial).await?;
-        writer.write_string(&self.location).await?;
+        let mut buffer = Vec::new();
 
-        writer.write_u16_le(self.modes.len() as u16).await?;
+        buffer.write_u32_le(self.device_type).await?;
+        buffer.write_string(&self.name).await?;
+        buffer.write_string(&self.description).await?;
+        buffer.write_string(&self.version).await?;
+        buffer.write_string(&self.serial).await?;
+        buffer.write_string(&self.location).await?;
+
+        buffer.write_u16_le(self.modes.len() as u16).await?;
         for mode in &self.modes {
-            mode.serialize(writer).await?;
+            mode.serialize(&mut buffer).await?;
         }
 
-        writer.write_u16_le(self.zones.len() as u16).await?;
+        buffer.write_u16_le(self.zones.len() as u16).await?;
         for zone in &self.zones {
-            zone.serialize(writer).await?;
+            zone.serialize(&mut buffer).await?;
         }
 
-        writer.write_u16_le(self.leds.len() as u16).await?;
+        buffer.write_u16_le(self.leds.len() as u16).await?;
         for led in &self.leds {
-            led.serialize(writer).await?;
+            led.serialize(&mut buffer).await?;
         }
 
-        writer.write_u16_le(self.colors.len() as u16).await?;
+        buffer.write_u16_le(self.colors.len() as u16).await?;
         for color in &self.colors {
-            writer.write_u32_le(*color).await?;
+            buffer.write_u32_le(*color).await?;
         }
+
+        writer.write_u32_le(buffer.len() as u32).await?;
+        writer.write_all(&buffer).await?;
 
         Ok(())
     }
 
     async fn deserialize<R: AsyncOpenRGBReadExt>(reader: &mut R) -> OpenRGBResult<Self::Output> {
+        let _ = reader.read_u32_le().await?;
         let device_type = reader.read_u32_le().await?;
         let name = reader.read_string().await?;
         let description = reader.read_string().await?;
