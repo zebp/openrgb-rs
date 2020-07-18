@@ -49,6 +49,7 @@ impl OpenRGBSendable for PacketHeader {
         writer.write_u32(self.length).await?;
         Ok(())
     }
+
     async fn deserialize<R: AsyncOpenRGBReadExt>(reader: &mut R) -> OpenRGBResult<Self::Output> {
         let magic = reader.read_u32_le().await?;
         let device = reader.read_u32_le().await?;
