@@ -8,22 +8,31 @@ use std::convert::TryFrom;
 
 #[async_trait]
 pub(crate) trait OpenRGBConnection {
-    async fn send_message(
-        &mut self,
+    async fn send_message<W: AsyncOpenRGBWriteExt>(
+        writer: &mut W,
         command: Command,
         buffer: &[u8],
-        device: Option<i32>,
+        device: Option<u32>,
     ) -> OpenRGBResult<()> {
-        todo!()
+        let header = PacketHeader {
+            magic: 0,
+            device: device.unwrap_or(0),
+            command,
+            length: buffer.len() as u32,
+        };
+
+        header.serialize(writer).await?;
+        writer.write_all(buffer).await?;
+        Ok(())
     }
 }
 
 #[derive(Debug)]
-pub struct PacketHeader {
-    magic: u32,
-    device: u32,
-    command: Command,
-    length: u32,
+struct PacketHeader {
+    pub magic: u32,
+    pub device: u32,
+    pub command: Command,
+    pub length: u32,
 }
 
 #[async_trait]

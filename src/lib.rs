@@ -1,3 +1,4 @@
+mod types;
 mod client;
 mod command;
 mod error;
