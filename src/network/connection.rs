@@ -6,7 +6,6 @@ use crate::{
 };
 use async_trait::async_trait;
 use std::{convert::TryFrom, io::Cursor};
-use tokio::io::AsyncReadExt;
 
 const MAGIC: u32 = 1111970383;
 
@@ -51,15 +50,14 @@ pub(crate) trait OpenRGBConnection {
         Ok(())
     }
 
-    async fn read_command<R: AsyncOpenRGBReadExt>(reader: &mut R) -> OpenRGBResult<Command> {
-        let header = PacketHeader::deserialize(reader).await?;
-        Ok(header.command)
-    }
-
     async fn read_packet<R: AsyncOpenRGBReadExt>(reader: &mut R) -> OpenRGBResult<OpenRGBPackets> {
         let header = PacketHeader::deserialize(reader).await?;
         let mut buffer = vec![0u8; header.length as usize];
         reader.read_exact(&mut buffer).await?;
+
+        if header.length == 0 {
+            return Ok(OpenRGBPackets::Command(header.command));
+        }
 
         let mut buffer = Cursor::new(buffer);
 

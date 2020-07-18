@@ -1,11 +1,17 @@
 use crate::command::Command;
 use crate::{
-    network::{packet::{OpenRGBPackets, SetClientNamePacket}, OpenRGBConnection},
+    network::{
+        packet::{OpenRGBPackets, SetClientNamePacket},
+        OpenRGBConnection,
+    },
     types::OpenRGBDevice,
     OpenRGBResult,
 };
 use async_trait::async_trait;
-use tokio::{io::AsyncWriteExt, net::{TcpStream, ToSocketAddrs}};
+use tokio::{
+    io::AsyncWriteExt,
+    net::{TcpStream, ToSocketAddrs},
+};
 
 pub struct OpenRGBClient {
     connection: TcpStream,
@@ -28,7 +34,6 @@ impl OpenRGBClient {
         let packet = SetClientNamePacket::new(self.name.clone());
         Self::send_packet(&mut self.connection, packet, None).await?;
         self.connection.flush().await?;
-        println!("flushed");
         Ok(())
     }
 
@@ -42,19 +47,22 @@ impl OpenRGBClient {
         let mut devices = Vec::with_capacity(count as usize);
 
         for index in 0..count {
-            Self::send_command(&mut self.connection, Command::RequestControllerData, Some(index)).await?;
+            Self::send_command(
+                &mut self.connection,
+                Command::RequestControllerData,
+                Some(index),
+            )
+            .await?;
             let device = match Self::read_packet(&mut self.connection).await? {
                 OpenRGBPackets::RequestControllerData(packet) => packet.device,
                 _ => todo!(),
-            }; 
+            };
 
             devices.push(device);
         }
-        
+
         Ok(devices)
     }
-
-
 }
 
 #[async_trait]

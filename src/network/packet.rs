@@ -11,6 +11,8 @@ pub enum OpenRGBPackets {
     SetClientName(SetClientNamePacket),
     RequestControllerCount(RequestControllerCountPacket),
     RequestControllerData(RequestControllerDataPacket),
+    /// A packet that has no data other than it's id
+    Command(Command),
 }
 
 pub trait OpenRGBPacket: Sync + OpenRGBSendable {
