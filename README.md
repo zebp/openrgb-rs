@@ -1,8 +1,13 @@
 # openrgb
-An implementation of the OpenRGB SDK protocol in Rust.
+An implementation of the [OpenRGB](https://gitlab.com/CalcProgrammer1/OpenRGB) SDK protocol in Rust.
 
 ## Note
+
+### Server Implementation
 The implementation of an OpenRGB SDK server is still W.I.P.
+
+### Tokio
+This project uses the [tokio](https://github.com/tokio-rs/tokio/) runtime but is required to use the Git version until the next release due to the addition of `Little Endian` methods to the async read/write extension traits.
 
 ## Example
 
