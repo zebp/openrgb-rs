@@ -14,11 +14,11 @@ pub(crate) trait OpenRGBConnection {
     async fn send_command<W: AsyncOpenRGBWriteExt>(
         writer: &mut W,
         command: Command,
-        device: Option<u32>,
+        device: Option<usize>,
     ) -> OpenRGBResult<()> {
         let header = PacketHeader {
             magic: MAGIC,
-            device: device.unwrap_or(0),
+            device: device.unwrap_or(0) as u32,
             command,
             length: 0,
         };
@@ -31,7 +31,7 @@ pub(crate) trait OpenRGBConnection {
     async fn send_packet<W: AsyncOpenRGBWriteExt, P: OpenRGBPacket>(
         writer: &mut W,
         packet: P,
-        device: Option<u32>,
+        device: Option<usize>,
     ) -> OpenRGBResult<()> {
         let command = packet.command();
         let mut buffer = Vec::new();
@@ -39,7 +39,7 @@ pub(crate) trait OpenRGBConnection {
 
         let header = PacketHeader {
             magic: MAGIC,
-            device: device.unwrap_or(0),
+            device: device.unwrap_or(0) as u32,
             command,
             length: buffer.len() as u32,
         };
