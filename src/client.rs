@@ -204,8 +204,7 @@ impl OpenRGBClient {
         zone_id: usize,
         new_size: u32,
     ) -> OpenRGBResult<()> {
-        self
-            .devices
+        self.devices
             .get(device_id)
             .ok_or_else(|| OpenRGBError::InvalidId(device_id))?
             .zones
