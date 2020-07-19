@@ -34,7 +34,7 @@ impl OpenRGBClient {
         Ok(())
     }
 
-    pub async fn get_controller_count(&mut self) -> OpenRGBResult<u32> {
+    pub async fn get_device_count(&mut self) -> OpenRGBResult<u32> {
         Self::send_command(&mut self.connection, Command::RequestControllerCount, None).await?;
         let count = match Self::read_packet(&mut self.connection).await? {
             OpenRGBPackets::RequestControllerCount(packet) => packet.count,
@@ -43,7 +43,7 @@ impl OpenRGBClient {
         Ok(count)
     }
 
-    pub async fn get_controller_data(&mut self, device_id: u32) -> OpenRGBResult<OpenRGBDevice> {
+    pub async fn get_device(&mut self, device_id: u32) -> OpenRGBResult<OpenRGBDevice> {
         Self::send_command(
             &mut self.connection,
             Command::RequestControllerData,
