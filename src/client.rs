@@ -24,7 +24,7 @@ impl OpenRGBClient {
         let mut client = Self {
             connection: TcpStream::connect(address).await?,
             name: name.into(),
-            devices: vec![], // Assume a
+            devices: vec![],
         };
 
         client.send_name().await.map(|_| client)
