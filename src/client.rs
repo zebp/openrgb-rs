@@ -1,11 +1,8 @@
 use crate::command::Command;
 use crate::{
-    network::{
-        packet::{OpenRGBPackets, SetClientNamePacket},
-        OpenRGBConnection,
-    },
-    types::OpenRGBDevice,
-    OpenRGBResult,
+    network::{connection::OpenRGBConnection, packet::*},
+    types::{OpenRGBColor, OpenRGBDevice},
+    OpenRGBMode, OpenRGBResult,
 };
 use async_trait::async_trait;
 use tokio::{
@@ -37,31 +34,86 @@ impl OpenRGBClient {
         Ok(())
     }
 
-    pub async fn get_devices(&mut self) -> OpenRGBResult<Vec<OpenRGBDevice>> {
+    pub async fn get_controller_count(&mut self) -> OpenRGBResult<u32> {
         Self::send_command(&mut self.connection, Command::RequestControllerCount, None).await?;
         let count = match Self::read_packet(&mut self.connection).await? {
             OpenRGBPackets::RequestControllerCount(packet) => packet.count,
             _ => todo!(),
         };
+        Ok(count)
+    }
 
-        let mut devices = Vec::with_capacity(count as usize);
+    pub async fn get_controller_data(&mut self, device_id: u32) -> OpenRGBResult<OpenRGBDevice> {
+        Self::send_command(
+            &mut self.connection,
+            Command::RequestControllerData,
+            Some(device_id),
+        )
+        .await?;
+        let device = match Self::read_packet(&mut self.connection).await? {
+            OpenRGBPackets::RequestControllerData(packet) => packet.device,
+            _ => todo!(),
+        };
 
-        for index in 0..count {
-            Self::send_command(
-                &mut self.connection,
-                Command::RequestControllerData,
-                Some(index),
-            )
-            .await?;
-            let device = match Self::read_packet(&mut self.connection).await? {
-                OpenRGBPackets::RequestControllerData(packet) => packet.device,
-                _ => todo!(),
-            };
+        Ok(device)
+    }
 
-            devices.push(device);
-        }
+    pub async fn set_custom_mode(&mut self, device_id: u32) -> OpenRGBResult<()> {
+        Self::send_command(
+            &mut self.connection,
+            Command::SetCustomMode,
+            Some(device_id),
+        )
+        .await
+    }
 
-        Ok(devices)
+    pub async fn update_leds(
+        &mut self,
+        device_id: u32,
+        colors: &[OpenRGBColor],
+    ) -> OpenRGBResult<()> {
+        let packet = UpdateLedsPacket::new(colors.to_vec());
+        Self::send_packet(&mut self.connection, packet, Some(device_id)).await
+    }
+
+    pub async fn update_zone_leds(
+        &mut self,
+        device_id: u32,
+        zone_id: usize,
+        colors: &[OpenRGBColor],
+    ) -> OpenRGBResult<()> {
+        let packet = UpdateZoneLedsPacket::new(zone_id, colors.to_vec());
+        Self::send_packet(&mut self.connection, packet, Some(device_id)).await
+    }
+
+    pub async fn update_single_led(
+        &mut self,
+        device_id: u32,
+        led_id: usize,
+        color: OpenRGBColor,
+    ) -> OpenRGBResult<()> {
+        let packet = UpdateSingleLedPacket::new(led_id, color);
+        Self::send_packet(&mut self.connection, packet, Some(device_id)).await
+    }
+
+    pub async fn update_mode(
+        &mut self,
+        device_id: u32,
+        mode_id: usize,
+        mode: &OpenRGBMode,
+    ) -> OpenRGBResult<()> {
+        let packet = UpdateModePacket::new(mode_id, mode.clone());
+        Self::send_packet(&mut self.connection, packet, Some(device_id)).await
+    }
+
+    pub async fn resize_zone(
+        &mut self,
+        device_id: u32,
+        zone_id: usize,
+        new_size: u32,
+    ) -> OpenRGBResult<()> {
+        let packet = ResizeZonePacket::new(zone_id, new_size);
+        Self::send_packet(&mut self.connection, packet, Some(device_id)).await
     }
 }
 

@@ -71,6 +71,21 @@ pub(crate) trait OpenRGBConnection {
             Command::RequestControllerData => OpenRGBPackets::RequestControllerData(
                 RequestControllerDataPacket::deserialize(&mut buffer).await?,
             ),
+            Command::UpdateLeds => {
+                OpenRGBPackets::UpdateLeds(UpdateLedsPacket::deserialize(&mut buffer).await?)
+            }
+            Command::UpdateZoneLeds => OpenRGBPackets::UpdateZoneLeds(
+                UpdateZoneLedsPacket::deserialize(&mut buffer).await?,
+            ),
+            Command::UpdateSingleLed => OpenRGBPackets::UpdateSingleLed(
+                UpdateSingleLedPacket::deserialize(&mut buffer).await?,
+            ),
+            Command::ResizeZone => {
+                OpenRGBPackets::ResizeZone(ResizeZonePacket::deserialize(&mut buffer).await?)
+            }
+            Command::UpdateMode => {
+                OpenRGBPackets::UpdateMode(UpdateModePacket::deserialize(&mut buffer).await?)
+            }
             _ => todo!(),
         };
 

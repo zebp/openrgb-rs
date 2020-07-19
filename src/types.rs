@@ -5,7 +5,7 @@ use crate::{
 use async_trait::async_trait;
 use tokio::io::AsyncWriteExt;
 
-pub type OpenRGBColor = u32;
+pub type OpenRGBColor = (u8, u8, u8);
 pub type OpenRGBZoneType = u32;
 
 #[derive(Debug, Clone)]
@@ -96,7 +96,7 @@ impl OpenRGBSendable for OpenRGBDevice {
 
         buffer.write_u16_le(self.colors.len() as u16).await?;
         for color in &self.colors {
-            buffer.write_u32_le(*color).await?;
+            color.serialize(&mut buffer).await?
         }
 
         writer.write_u32_le(buffer.len() as u32).await?;
@@ -144,7 +144,7 @@ impl OpenRGBSendable for OpenRGBDevice {
         let mut colors: Vec<OpenRGBColor> = Vec::with_capacity(color_count);
 
         for _ in 0..color_count {
-            let color = reader.read_u32_le().await?;
+            let color = OpenRGBColor::deserialize(reader).await?;
             colors.push(color);
         }
 
@@ -186,7 +186,7 @@ impl OpenRGBSendable for OpenRGBMode {
         writer.write_u16_le(self.colors.len() as u16).await?;
 
         for color in &self.colors {
-            writer.write_u32_le(*color).await?;
+            color.serialize(writer).await?
         }
 
         Ok(())
@@ -207,7 +207,7 @@ impl OpenRGBSendable for OpenRGBMode {
         let mut colors = Vec::with_capacity(color_count);
 
         for _ in 0..color_count {
-            let color = reader.read_u32_le().await?;
+            let color = OpenRGBColor::deserialize(reader).await?;
             colors.push(color);
         }
 
@@ -329,5 +329,31 @@ impl OpenRGBSendable for OpenRGBLed {
         let value = reader.read_u32_le().await?;
 
         Ok(Self { name, value })
+    }
+}
+
+#[async_trait]
+impl OpenRGBSendable for OpenRGBColor {
+    type Output = Self;
+    async fn serialize<W: AsyncOpenRGBWriteExt + Send + Unpin>(
+        &self,
+        writer: &mut W,
+    ) -> OpenRGBResult<()> {
+        let (r, g, b) = *self;
+
+        writer.write_u8(r).await?;
+        writer.write_u8(g).await?;
+        writer.write_u8(b).await?;
+        writer.write_u8(0).await?;
+
+        Ok(())
+    }
+    async fn deserialize<R: AsyncOpenRGBReadExt>(reader: &mut R) -> OpenRGBResult<Self::Output> {
+        let r = reader.read_u8().await?;
+        let g = reader.read_u8().await?;
+        let b = reader.read_u8().await?;
+        let _ = reader.read_u8().await?;
+
+        Ok((r, g, b))
     }
 }

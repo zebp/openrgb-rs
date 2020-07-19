@@ -1,4 +1,2 @@
-mod connection;
+pub(crate) mod connection;
 pub mod packet;
-
-pub use connection::*;
