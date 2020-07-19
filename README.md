@@ -14,6 +14,8 @@ This project uses the [tokio](https://github.com/tokio-rs/tokio/) runtime but is
 ```rust
 use openrgb::*;
 
+const RED: OpenRGBColor = (0xFF, 0x00, 0x00);
+
 #[tokio::main]
 async fn main() -> OpenRGBResult<()> {
     let mut client = OpenRGBClient::connect("0.0.0.0:6742", "Example").await?;
@@ -23,7 +25,7 @@ async fn main() -> OpenRGBResult<()> {
         let device = client.get_device(device_id).await?;
 
         client.set_custom_mode(device_id).await?;
-        client.update_leds(device_id, &vec![(0xFF, 0x0, 0x0); device.colors.len()]).await?;
+        client.update_leds(device_id, &vec![RED; device.colors.len()]).await?;
     }
 
     Ok(())
