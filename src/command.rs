@@ -1,5 +1,5 @@
 use crate::OpenRGBError;
-use std::convert::TryFrom;
+use std::{convert::TryFrom, fmt::Display};
 
 #[derive(Debug, Clone)]
 pub enum Command {
@@ -12,6 +12,24 @@ pub enum Command {
     UpdateSingleLed = 1052,
     SetCustomMode = 1100,
     UpdateMode = 1101,
+}
+
+impl Display for Command {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let name = match self {
+            Self::SetClientName => "SetClientName",
+            Self::RequestControllerCount => "RequestControllerCount",
+            Self::RequestControllerData => "RequestControllerData",
+            Self::ResizeZone => "ResizeZone",
+            Self::UpdateLeds => "UpdateLeds",
+            Self::UpdateZoneLeds => "UpdateZoneLeds",
+            Self::UpdateSingleLed => "UpdateSingleLed",
+            Self::SetCustomMode => "SetCustomMode",
+            Self::UpdateMode => "UpdateMode",
+        };
+
+        write!(f, "{}", name)
+    }
 }
 
 impl TryFrom<u32> for Command {

@@ -2,7 +2,7 @@ use super::packet::*;
 use crate::{
     command::Command,
     io::{AsyncOpenRGBReadExt, AsyncOpenRGBWriteExt, OpenRGBSendable},
-    OpenRGBResult,
+    OpenRGBResult, OpenRGBError,
 };
 use async_trait::async_trait;
 use std::{convert::TryFrom, io::Cursor};
@@ -86,7 +86,7 @@ pub(crate) trait OpenRGBConnection {
             Command::UpdateMode => {
                 OpenRGBPackets::UpdateMode(UpdateModePacket::deserialize(&mut buffer).await?)
             }
-            _ => todo!(),
+            _ => return Err(OpenRGBError::InvalidPacketBody(header.command)),
         };
 
         Ok(packet)

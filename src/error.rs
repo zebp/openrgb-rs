@@ -1,4 +1,5 @@
 use thiserror::Error;
+use crate::command::Command;
 
 pub type OpenRGBResult<T> = Result<T, OpenRGBError>;
 
@@ -16,4 +17,6 @@ pub enum OpenRGBError {
     InvalidMode(String),
     #[error("string is not valid UTF8 {0}")]
     InvalidUTF8(#[from] std::string::FromUtf8Error),
+    #[error("invalid packet body for {0}")]
+    InvalidPacketBody(Command),
 }
