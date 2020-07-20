@@ -42,7 +42,7 @@ impl OpenRGBClient {
         Self::send_command(&mut self.connection, Command::RequestControllerCount, None).await?;
         let count = match Self::read_packet(&mut self.connection).await? {
             OpenRGBPackets::RequestControllerCount(packet) => packet.count as usize,
-            _ => todo!(),
+            _ => return Err(OpenRGBError::UnexpectedPacket),
         };
         Ok(count)
     }
@@ -58,7 +58,7 @@ impl OpenRGBClient {
         .await?;
         let device = match Self::read_packet(&mut self.connection).await? {
             OpenRGBPackets::RequestControllerData(packet) => packet.device,
-            _ => todo!(),
+            _ => return Err(OpenRGBError::UnexpectedPacket),
         };
 
         // Store a copy of the device so we can use device info for later calls.

@@ -19,4 +19,6 @@ pub enum OpenRGBError {
     InvalidUTF8(#[from] std::string::FromUtf8Error),
     #[error("invalid packet body for {0}")]
     InvalidPacketBody(Command),
+    #[error("unexpected packet")]
+    UnexpectedPacket,
 }
