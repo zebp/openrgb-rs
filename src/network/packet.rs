@@ -50,7 +50,7 @@ impl OpenRGBSendable for SetClientNamePacket {
         let mut buffer = Vec::new();
         reader.read_to_end(&mut buffer).await?;
 
-        let name = String::from_utf8(buffer).unwrap();
+        let name = String::from_utf8(buffer)?;
         Ok(Self { name })
     }
 }

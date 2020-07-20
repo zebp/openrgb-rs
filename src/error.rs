@@ -14,4 +14,6 @@ pub enum OpenRGBError {
     InvalidColorAmount(usize, usize),
     #[error("invalid mode {0}")]
     InvalidMode(String),
+    #[error("string is not valid UTF8 {0}")]
+    InvalidUTF8(#[from] std::string::FromUtf8Error),
 }

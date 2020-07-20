@@ -1,4 +1,4 @@
-use crate::OpenRGBResult;
+use crate::{OpenRGBError, OpenRGBResult};
 use async_trait::async_trait;
 use tokio::prelude::io::*;
 
@@ -38,8 +38,7 @@ pub trait AsyncOpenRGBReadExt: AsyncReadExt + Unpin + Send {
 
         let buffer = &buffer[0..buffer.len() - 1];
 
-        // TODO: Handle this error
-        Ok(String::from_utf8(buffer.to_vec()).unwrap())
+        String::from_utf8(buffer.to_vec()).map_err(OpenRGBError::from)
     }
 }
 
