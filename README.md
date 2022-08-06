@@ -1,3 +1,7 @@
+# Archived
+
+Go use [nicoulaj/openrgb-rs](https://github.com/nicoulaj/openrgb-rs) instead.
+
 # openrgb
 An implementation of the [OpenRGB](https://gitlab.com/CalcProgrammer1/OpenRGB) SDK protocol in Rust.
 
